@@ -18,6 +18,7 @@ function App() {
         <Notifications />
         <Layout>
           <Routes>
+            <Route path="/" Component={Home} />
             <Route path="/home" Component={Home} />
             <Route path="/shifts" Component={Shifts} />
             <Route path="/employees" Component={Employees} />

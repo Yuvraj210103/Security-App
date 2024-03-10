@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema({
     enum: ["supervisor", "guard", "admin", "other"],
     default: "supervisor",
   },
+  shifts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Shift",
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);
