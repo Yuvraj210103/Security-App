@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Dialog from "../../../common/Dialog";
-import InputWithTopHeader from "../../../common/inputs/InputWithTopHeader";
 import InputSelect from "../../../common/inputs/InputSelect";
 import { z } from "zod";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputDate from "../../../common/inputs/InputDate";
-import { FiClock } from "react-icons/fi";
 import TextareaWithTopHeader from "../../../common/inputs/TextareaWithTopHeader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import InputTime from "../../../common/inputs/InputTime";
 
 const addShiftFormSchema = z.object({
   position: z.enum(["supervisor", "guard", "other"]),
@@ -28,26 +27,33 @@ const AddShiftModal = ({
   opened: boolean;
   setOpened: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const [formData, setFormData] = useState<AddShiftFormFields>({
-    position: "supervisor",
-    date: new Date(),
-    start_time: "",
-    end_time: "",
-    description: "",
-  });
-
   const methods = useForm<AddShiftFormFields>({
     resolver: zodResolver(addShiftFormSchema),
-    defaultValues: formData,
   });
 
   const [shiftDate, setShiftDate] = useState<Date | null>(new Date());
+
+  const [startTime, setStartTime] = useState("06:00 AM");
+
+  const [endTime, setEndTime] = useState("10:00 PM");
 
   useEffect(() => {
     if (shiftDate) {
       methods.setValue("date", shiftDate);
     }
   }, [shiftDate]);
+
+  useEffect(() => {
+    if (startTime) {
+      methods.setValue("start_time", startTime);
+    }
+  }, [startTime]);
+
+  useEffect(() => {
+    if (endTime) {
+      methods.setValue("end_time", endTime);
+    }
+  }, [endTime]);
 
   const onSubmit = async (data: AddShiftFormFields) => {
     try {
@@ -64,13 +70,7 @@ const AddShiftModal = ({
         return;
       }
       if (res.ok) {
-        setFormData({
-          position: "supervisor",
-          date: new Date(),
-          start_time: "",
-          end_time: "",
-          description: "",
-        });
+        methods.reset();
         setOpened(false);
         toast.success("Shift added successfully");
       }
@@ -114,23 +114,20 @@ const AddShiftModal = ({
                 id="shift_date"
               />
 
-              <InputWithTopHeader
-                className="mx-0"
+              <InputTime
                 label="Start time"
-                tailIcon={<FiClock className="w-4 h-4" />}
-                register={methods.register}
-                name="start_time"
-                error={methods.formState.errors?.start_time?.message}
+                value={startTime}
+                onChange={setStartTime}
+                use12Hours={true}
               />
 
-              <InputWithTopHeader
-                className="mx-0"
+              <InputTime
                 label="End time"
-                tailIcon={<FiClock className="w-4 h-4" />}
-                register={methods.register}
-                name="end_time"
-                error={methods.formState.errors?.end_time?.message}
+                value={endTime}
+                onChange={setEndTime}
+                use12Hours={true}
               />
+
               <div className="col-span-2">
                 <TextareaWithTopHeader
                   title="Description"

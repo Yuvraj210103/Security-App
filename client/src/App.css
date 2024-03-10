@@ -3,3 +3,11 @@
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.remove-horizontal-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.remove-vertical-scrollbar::-webkit-scrollbar {
+  display: none;
+}
