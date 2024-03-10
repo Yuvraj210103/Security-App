@@ -1,13 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddShiftModal from "../../component/shifts/modal/AddShiftModal";
+
+interface Shift {
+  _id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  position: string;
+  description?: string;
+}
 
 const Shifts = () => {
   const [createShiftDialog, setCreateShiftDialog] = useState(false);
+  const [shifts, setShifts] = useState<Shift[]>([]);
+
+  useEffect(() => {
+    const fetchShifts = async () => {
+      try {
+        const response = await fetch("/api/shift/getshifts");
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setShifts(data);
+      } catch (error) {
+        console.error("Error fetching shifts:", error);
+      }
+    };
+
+    fetchShifts();
+  }, []);
+
   return (
     <div className="flex flex-col w-full h-full p-6 gap-6">
       <div className="flex justify-between w-full p-4 rounded bg-primaryGold text-surface items-center">
         <span className="font-semibold text-xl">Shifts</span>
-
         <button
           onClick={() => setCreateShiftDialog(true)}
           className="bg-primary text-surface px-4 py-2 rounded"
@@ -40,26 +69,27 @@ const Shifts = () => {
           </tr>
         </thead>
         <tbody className="[&>*:nth-child(even)]:bg-[#5856560f]">
-          <tr
-            onClick={() => setCreateShiftDialog(true)}
-            className="cursor-pointer "
-          >
-            <td className="px-4 py-2 text-center">12/03/24</td>
-            <td className="px-4 py-2 text-center">10:00 AM</td>
-            <td className="px-4 py-2 text-center">06:00 PM</td>
-            <td className="px-4 py-2 text-center">Guard</td>
-            <td className="px-4 py-2 text-center">N/A</td>
-          </tr>
-          <tr
-            onClick={() => setCreateShiftDialog(true)}
-            className="cursor-pointer "
-          >
-            <td className="px-4 py-2 text-center">13/03/24</td>
-            <td className="px-4 py-2 text-center">11:00 AM</td>
-            <td className="px-4 py-2 text-center">07:00 PM</td>
-            <td className="px-4 py-2 text-center">Supervisor</td>
-            <td className="px-4 py-2 text-center">N/A</td>
-          </tr>
+          {shifts.map((shift, index) => (
+            <tr
+              key={index}
+              onClick={() => setCreateShiftDialog(true)}
+              className="cursor-pointer "
+            >
+              <td className="px-4 py-2 text-center">
+                {new Date(shift.date).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })}
+              </td>
+              <td className="px-4 py-2 text-center">{shift.start_time}</td>
+              <td className="px-4 py-2 text-center">{shift.end_time}</td>
+              <td className="px-4 py-2 text-center">{shift.position}</td>
+              <td className="px-4 py-2 text-center">
+                {shift.description || "N/A"}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

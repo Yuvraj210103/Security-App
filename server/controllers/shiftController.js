@@ -28,26 +28,18 @@ export const getShift = async (req, res) => {
 
 export const addShift = async (req, res) => {
   try {
-    const {
-      shiftName,
-      shiftTimeStart,
-      shiftTimeEnd,
-      lunchBreakStart,
-      lunchBreakEnd,
-      shiftAddress,
-    } = req.body;
+    const { position, date, start_time, end_time, description } = req.body;
 
-    if (!shiftName || !shiftTimeStart || !shiftTimeEnd || !shiftAddress) {
+    if (!position || !date || !start_time || !end_time) {
       return res.status(400).json({ error: "Required fields missing" });
     }
 
     const newShift = new Shift({
-      shiftName,
-      shiftTimeStart,
-      shiftTimeEnd,
-      lunchBreakStart,
-      lunchBreakEnd,
-      shiftAddress,
+      position,
+      date,
+      start_time,
+      end_time,
+      description,
     });
 
     const savedShift = await newShift.save();

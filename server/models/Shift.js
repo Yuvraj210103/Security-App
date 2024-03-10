@@ -1,12 +1,27 @@
 import mongoose from "mongoose";
 
 const shiftSchema = new mongoose.Schema({
-  shiftName: { type: String, required: true },
-  shiftTimeStart: { type: String, required: true },
-  shiftTimeEnd: { type: String, required: true },
-  lunchBreakStart: { type: String },
-  lunchBreakEnd: { type: String },
-  shiftAddress: { type: String, required: true },
+  position: {
+    type: String,
+    enum: ["supervisor", "guard", "other"],
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
+  },
+  start_time: {
+    type: String,
+    required: true,
+  },
+  end_time: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    default: "",
+  },
 });
 
 const Shift = mongoose.model("Shift", shiftSchema);
