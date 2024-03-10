@@ -9,6 +9,7 @@ import { Notifications } from "@mantine/notifications";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import Shifts from "./pages/shifts/Shifts";
+import Schedule from "./pages/schedule/Schedule";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/home" Component={Home} />
             <Route path="/shifts" Component={Shifts} />
             <Route path="/employees" Component={Employees} />
+            <Route path="/schedules" Component={Schedule} />
           </Routes>
         </Layout>
       </ModalsProvider>
