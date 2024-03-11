@@ -47,9 +47,7 @@ const AssignShiftModal = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
       const { userId, selectedShifts } = formData;
 
@@ -100,8 +98,14 @@ const AssignShiftModal = ({
       title="Add Employee"
       size="350px"
       isFormModal
+      positiveCallback={handleSubmit}
     >
-      <form onSubmit={handleSubmit}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <div className="flex flex-col">
           <div className="flex flex-col text-sm">
             <div className="flex items-center gap-2">
@@ -136,13 +140,6 @@ const AssignShiftModal = ({
               <p key="no-shifts">No shifts left</p>
             )}
           </div>
-
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 mt-4 rounded"
-          >
-            Submit
-          </button>
         </div>
       </form>
     </Dialog>
