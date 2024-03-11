@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Shift from "../models/Shift.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -40,6 +41,48 @@ export const addUser = async (req, res) => {
     res.status(201).json(savedUser);
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+export const addShift = async (req, res) => {
+  const { userId, shiftId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    const shift = await Shift.findById(shiftId).populate("date");
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!shift) {
+      return res.status(404).json({ error: "Shift not found" });
+    }
+
+    if (user.shifts.includes(shiftId)) {
+      return res
+        .status(400)
+        .json({ error: "Shift already assigned to the user" });
+    }
+
+    const shiftAssignedToOtherUser = await User.findOne({ shifts: shiftId });
+
+    if (
+      shiftAssignedToOtherUser &&
+      shiftAssignedToOtherUser._id.toString() !== userId
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Shift already assigned to another user" });
+    }
+
+    user.shifts.push(shift);
+    const updatedUser = await user.save();
+
+    return res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Server Error" });
   }
 };
 

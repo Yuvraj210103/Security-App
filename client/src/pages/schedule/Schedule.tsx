@@ -13,6 +13,7 @@ export interface Shift {
   end_time: string;
   position: string;
   description?: string;
+  isAssigned?: boolean;
 }
 
 export interface User {
@@ -22,6 +23,7 @@ export interface User {
   email: string;
   phone_number: string;
   role: string;
+  shifts: string[];
 }
 
 const Schedule = () => {
@@ -32,8 +34,7 @@ const Schedule = () => {
   const [assignShiftModal, setAssignShiftModal] = useState(false);
   const [selectedEmp, setSelectedEmp] = useState<User | null>(null);
   const [selectedEmpDate, setSelectedEmpDate] = useState<string | null>(null);
-
-  console.log(shifts);
+  console.log(users);
 
   useEffect(() => {
     const fetchShifts = async () => {
@@ -132,6 +133,12 @@ const Schedule = () => {
           </tr>
         </thead>
 
+
+
+
+
+
+
         <tbody className="text-sm">
           {/* This row will have unassigned shifts */}
           <tr className="bg-primaryGold/40">
@@ -154,16 +161,36 @@ const Schedule = () => {
                   className="text-center px-2 py-2 border border-gray-500"
                 >
                   <div className="flex flex-col">
-                    {shiftsForDate.map((shift, index) => (
-                      <span key={index} className="py-1">
-                        {shift.start_time} - {shift.end_time}
-                      </span>
-                    ))}
+                    <div className="py-1 flex flex-col">
+                      {shiftsForDate.map((shift, index) => (
+                        <span
+                          key={index}
+                          className="flex flex-col items-center"
+                        >
+                          {shift.isAssigned === false ? (
+                            <>
+                              <span>
+                                {shift.start_time} - {shift.end_time}
+                              </span>
+                              {index < shiftsForDate.length - 1 && (
+                                <div className="border-b border-black h-1 w-full mb-1"></div>
+                              )}
+                            </>
+                          ) : null}
+                        </span>
+                      ))}
+                      {!shiftsForDate.some((shift) => !shift.isAssigned) && (
+                        <p key="no-shifts">No shifts available</p>
+                      )}
+                    </div>
                   </div>
                 </td>
               );
             })}
           </tr>
+
+
+
 
           {/* All the employees details */}
           {users.map((user, userIndex) => (

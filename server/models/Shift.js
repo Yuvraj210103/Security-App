@@ -22,6 +22,14 @@ const shiftSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  isAssigned: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const Shift = mongoose.model("Shift", shiftSchema);

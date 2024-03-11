@@ -52,6 +52,28 @@ export const addShift = async (req, res) => {
 };
 
 
+export const assignShift = async (req, res) => {
+  const { shiftId } = req.params;
+
+  try {
+    // Find the shift by shiftId and update isAssigned to true
+    const updatedShift = await Shift.findByIdAndUpdate(
+      shiftId,
+      { isAssigned: true },
+      { new: true }
+    );
+
+    if (!updatedShift) {
+      return res.status(404).json({ error: 'Shift not found' });
+    }
+
+    return res.status(200).json({ success: true, shift: updatedShift });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server Error' });
+  }
+};
+
 export const modifyShift = async (req, res) => {
   try {
     const { shiftId } = req.params;
