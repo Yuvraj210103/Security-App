@@ -2,9 +2,64 @@ import { DatePickerInput } from "@mantine/dates";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { MdCalendarToday } from "react-icons/md";
-import { FaPlusCircle } from "react-icons/fa";
 import AddShiftModal from "../../component/shifts/modal/AddShiftModal";
 import AssignShiftModal from "../../component/schedule/modal/AssignShiftModal";
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+
+//DND specific code
+export const Box = ({ id, shift }: { id: string; shift: string }) => {
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: "box",
+    item: { shift, id },
+    end: (item, monitor) => {
+      const dropResult = monitor.getDropResult<{ id: string }>();
+      if (item && dropResult) {
+        alert(`You dropped ${item.shift} into user!`);
+      }
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+      handlerId: monitor.getHandlerId(),
+    }),
+  }));
+
+  return (
+    <div
+      ref={drag}
+      className=" pb-1 text-sm"
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+        cursor: "move",
+      }}
+    >
+      {shift}
+    </div>
+  );
+};
+
+export const Dustbin = () => {
+  const [{ canDrop, isOver }, drop] = useDrop(() => ({
+    accept: "box",
+    drop: () => ({ name: "Dustbin" }),
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
+  }));
+
+  const isActive = canDrop && isOver;
+
+  return (
+    <div
+      ref={drop}
+      data-testid="dustbin"
+      className={`${isActive ? "bg-gray-300" : "bg-gray-200"} w-full h-[60px]`}
+    >
+      &nbsp;
+    </div>
+  );
+};
 
 export interface Shift {
   _id: string;
@@ -117,141 +172,110 @@ const Schedule = () => {
           onChange={(e) => setSelectedDate(e)}
         />
       </div>
+      <DndProvider backend={HTML5Backend}>
+        <table className="border-b border-gray-500">
+          <thead className="text-sm font-normal">
+            <tr>
+              <th className="w-[20%] text-center">&nbsp;</th>
+              {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => (
+                <th key={dayIndex} className="w-[11.42%] text-center">
+                  {dayjs(selectedDate)
+                    .startOf("week")
+                    .add(dayIndex, "day")
+                    .format("MMM-DD - ddd")}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-      <table className="border-b border-gray-500">
-        <thead className="text-sm font-normal">
-          <tr>
-            <th className="w-[20%] text-center">&nbsp;</th>
-            {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => (
-              <th key={dayIndex} className="w-[11.42%] text-center">
-                {dayjs(selectedDate)
+          <tbody className="text-sm">
+            {/* This row will have unassigned shifts */}
+            <tr className="bg-primaryGold/40">
+              <td className="text-start px-2 py-2 border-t border-l border-gray-500 align-bottom font-semibold">
+                (Unassigned Shifts)
+              </td>
+              {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+                const currentDate = dayjs(selectedDate)
                   .startOf("week")
-                  .add(dayIndex, "day")
-                  .format("MMM-DD - ddd")}
-              </th>
-            ))}
-          </tr>
-        </thead>
+                  .add(dayIndex, "day");
+                const formattedDate = currentDate.format("MMM DD, YYYY");
+                const shiftsForDate = shifts.filter((shift) => {
+                  const shiftDate = dayjs(shift.date).format("MMM DD, YYYY");
+                  return shiftDate === formattedDate;
+                });
 
-
-
-
-
-
-
-        <tbody className="text-sm">
-          {/* This row will have unassigned shifts */}
-          <tr className="bg-primaryGold/40">
-            <td className="text-start px-2 py-2 border-t border-l border-gray-500 align-bottom font-semibold">
-              (Unassigned Shifts)
-            </td>
-            {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-              const currentDate = dayjs(selectedDate)
-                .startOf("week")
-                .add(dayIndex, "day");
-              const formattedDate = currentDate.format("MMM DD, YYYY");
-              const shiftsForDate = shifts.filter((shift) => {
-                const shiftDate = dayjs(shift.date).format("MMM DD, YYYY");
-                return shiftDate === formattedDate;
-              });
-
-              return (
-                <td
-                  key={dayIndex}
-                  className="text-center px-2 py-2 border border-gray-500"
-                >
-                  <div className="flex flex-col">
-                    <div className="py-1 flex flex-col">
-                      {shiftsForDate.map((shift, index) => (
-                        <span
-                          key={index}
-                          className="flex flex-col items-center"
-                        >
-                          {shift.isAssigned === false ? (
-                            <>
-                              <span>
-                                {shift.start_time} - {shift.end_time}
-                              </span>
-                              {index < shiftsForDate.length - 1 && (
-                                <div className="border-b border-black h-1 w-full mb-1"></div>
-                              )}
-                            </>
-                          ) : null}
-                        </span>
-                      ))}
-                      {!shiftsForDate.some((shift) => !shift.isAssigned) && (
-                        <p key="no-shifts">No shifts available</p>
-                      )}
+                return (
+                  <td
+                    key={dayIndex}
+                    className="text-center px-2 py-2 border border-gray-500"
+                  >
+                    <div className="flex flex-col">
+                      <div className="py-1 flex flex-col">
+                        {shiftsForDate.map((shift, index) => (
+                          <Box
+                            key={index}
+                            id={String(index)}
+                            shift={`${shift.start_time} - ${shift.end_time}`}
+                          />
+                        ))}
+                      </div>
                     </div>
+                  </td>
+                );
+              })}
+            </tr>
+
+            {/* All the employees details */}
+            {users.map((user, userIndex) => (
+              <tr key={userIndex}>
+                <td className="px-4 py-4 text-start border-t border-l border-gray-500">
+                  <div className="flex flex-col font-semibold">
+                    <span>
+                      {user.first_name} {user.last_name}
+                    </span>
+                    <span className="text-xs">
+                      {user.role.toUpperCase()} - {user.phone_number}
+                    </span>
                   </div>
                 </td>
-              );
-            })}
-          </tr>
-
-
-
-
-          {/* All the employees details */}
-          {users.map((user, userIndex) => (
-            <tr key={userIndex}>
-              <td className="px-4 py-4 text-start border-t border-l border-gray-500">
-                <div className="flex flex-col font-semibold">
-                  <span>
-                    {user.first_name} {user.last_name}
-                  </span>
-                  <span className="text-xs">
-                    {user.role.toUpperCase()} - {user.phone_number}
-                  </span>
-                </div>
-              </td>
-              {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => (
-                <td
-                  key={dayIndex}
-                  className="px-4 py-2 text-center border border-gray-500"
-                >
-                  {getUserShiftForDay(
-                    user._id,
-                    dayjs(selectedDate)
-                      .startOf("week")
-                      .add(dayIndex, "day")
-                      .format("YYYY-MM-DD")
-                  ).length > 0 ? (
-                    getUserShiftForDay(
+                {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => (
+                  <td
+                    key={dayIndex}
+                    className="text-center border border-gray-500 h-full"
+                  >
+                    {getUserShiftForDay(
                       user._id,
                       dayjs(selectedDate)
                         .startOf("week")
                         .add(dayIndex, "day")
                         .format("YYYY-MM-DD")
-                    ).map((shift, shiftIndex) => (
-                      <div key={shiftIndex} className="flex flex-col">
-                        <span>
-                          {shift.start_time} - {shift.end_time}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <FaPlusCircle
-                      className="h-5 w-5 m-auto text-blue-500 cursor-pointer"
-                      onClick={() => {
-                        setSelectedEmpDate(
-                          dayjs(selectedDate)
-                            .startOf("week")
-                            .add(dayIndex, "day")
-                            .toDate()
-                            .toDateString()
-                        );
-                        setSelectedEmp(user);
-                        setAssignShiftModal(true);
-                      }}
-                    />
-                  )}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                    ).length > 0 ? (
+                      getUserShiftForDay(
+                        user._id,
+                        dayjs(selectedDate)
+                          .startOf("week")
+                          .add(dayIndex, "day")
+                          .format("YYYY-MM-DD")
+                      ).map((shift, shiftIndex) => (
+                        <div
+                          key={shiftIndex}
+                          className="flex flex-col px-4 py-2"
+                        >
+                          <span>
+                            {shift.start_time} - {shift.end_time}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <Dustbin />
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </DndProvider>
 
       <div className="hidden">
         <AssignShiftModal
