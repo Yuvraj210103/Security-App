@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { MdCalendarToday } from "react-icons/md";
 import { FaPlusCircle } from "react-icons/fa";
+import AddShiftModal from "../../component/shifts/modal/AddShiftModal";
+import AssignShiftModal from "../../component/schedule/modal/AssignShiftModal";
 
-interface Shift {
+export interface Shift {
   _id: string;
   date: string;
   start_time: string;
@@ -13,7 +15,7 @@ interface Shift {
   description?: string;
 }
 
-interface User {
+export interface User {
   _id: string;
   first_name: string;
   last_name: string;
@@ -26,6 +28,11 @@ const Schedule = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [addShiftModal, setAddShiftModal] = useState(false);
+  const [assignShiftModal, setAssignShiftModal] = useState(false);
+  const [selectedEmp, setSelectedEmp] = useState<User | null>(null);
+  const [selectedEmpDate, setSelectedEmpDate] = useState<string | null>(null);
+
   console.log(shifts);
 
   useEffect(() => {
@@ -69,7 +76,14 @@ const Schedule = () => {
   // Function to get shifts for a user on a specific day
   const getUserShiftForDay = (userId: string, date: string) => {
     return shifts.filter(
-      (shift) => shift._id === userId && shift.date === date
+      (shift) => shift._id === userId && dayjs(shift.date).isSame(dayjs(date))
+    );
+  };
+
+  //* To get the available shift of a particular date
+  const getShiftForDay = (date: string | null) => {
+    return shifts.filter((shift) =>
+      dayjs(shift.date).isSame(dayjs(date), "date")
     );
   };
 
@@ -78,10 +92,15 @@ const Schedule = () => {
       <div className="flex justify-between w-full p-4 rounded bg-primaryGold text-surface items-center">
         <span className="font-semibold text-xl">Schedule</span>
 
-        <button className="bg-primary text-surface px-4 py-2 rounded">
-          Save Changes
+        <button
+          onClick={() => setAddShiftModal(true)}
+          className="bg-primary text-surface px-4 py-2 rounded"
+        >
+          Add new shift
         </button>
       </div>
+
+      <AddShiftModal opened={addShiftModal} setOpened={setAddShiftModal} />
 
       <div className="flex items-center gap-4">
         <div className="font-medium">
@@ -187,7 +206,17 @@ const Schedule = () => {
                   ) : (
                     <FaPlusCircle
                       className="h-5 w-5 m-auto text-blue-500 cursor-pointer"
-                      onClick={() => {}}
+                      onClick={() => {
+                        setSelectedEmpDate(
+                          dayjs(selectedDate)
+                            .startOf("week")
+                            .add(dayIndex, "day")
+                            .toDate()
+                            .toDateString()
+                        );
+                        setSelectedEmp(user);
+                        setAssignShiftModal(true);
+                      }}
                     />
                   )}
                 </td>
@@ -196,6 +225,16 @@ const Schedule = () => {
           ))}
         </tbody>
       </table>
+
+      <div className="hidden">
+        <AssignShiftModal
+          opened={assignShiftModal}
+          setOpened={setAssignShiftModal}
+          selectedEmp={selectedEmp}
+          selectedEmpDate={selectedEmpDate}
+          availableShifts={getShiftForDay(selectedEmpDate)}
+        />
+      </div>
     </div>
   );
 };
