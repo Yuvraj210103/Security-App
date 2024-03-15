@@ -12,7 +12,8 @@ import InputTime from "../../../common/inputs/InputTime";
 import InputWithTopHeader from "../../../common/inputs/InputWithTopHeader";
 
 const addShiftFormSchema = z.object({
-  position: z.enum(["supervisor", "guard", "other"]),
+  position: z.enum(["supervisor", "guard", "other"]).default("guard"),
+  employee: z.string().nullable(),
   date: z.date().default(new Date()),
   start_time: z.string().min(2, { message: "Start time is required" }),
   end_time: z.string().min(2, { message: "End time is required" }),
@@ -81,6 +82,8 @@ const AddShiftModal = ({
     }
   };
 
+  const position = methods.watch("position");
+
   return (
     <>
       <Dialog
@@ -100,12 +103,23 @@ const AddShiftModal = ({
               <InputSelect
                 label="Select Position"
                 options={[
-                  { title: "Supervisor", value: "supervisor" },
                   { title: "Guard", value: "guard" },
+                  { title: "Supervisor", value: "supervisor" },
                   { title: "Other", value: "other" },
                 ]}
                 register={methods.register}
                 name="position"
+                error={methods.formState.errors.position?.message}
+              />
+
+              <InputSelect
+                label={`Select ${position || "guard"}`}
+                options={[
+                  { title: "Jhon Doe", value: "Jhon Doe" },
+                  { title: "Rishabh Sharma", value: "Rishabh Sharma" },
+                ]}
+                register={methods.register}
+                name="employee"
                 error={methods.formState.errors.position?.message}
               />
 
