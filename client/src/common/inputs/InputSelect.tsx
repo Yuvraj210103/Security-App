@@ -45,13 +45,13 @@ const InputSelect = <FormFields extends Record<string, unknown>>({
             className={`bg-surfaceLight  outline-none text-textPrimaryLight text-sm rounded focus:ring-secondaryLight focus:border-secondaryLight block w-full p-2  dark:border-inputBorder dark:placeholder-textQuaternaryLight  dark:text-textPrimaryDark dark:focus:ring-secondaryLight dark:focus:border-secondaryLight ${selectClassName} dark:bg-primaryVariantDark cursor-pointer`}
           >
             {selected && (
-              <option value="" selected className="font-medium">
+              <option value="" selected className="font-medium text-lg">
                 {selected}
               </option>
             )}
             {options.map((e) => {
               return (
-                <option key={e.value} value={e.value}>
+                <option key={e.value} value={e.value} className="text-lg">
                   {e.title}
                 </option>
               );

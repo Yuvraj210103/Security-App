@@ -9,6 +9,7 @@ import TextareaWithTopHeader from "../../../common/inputs/TextareaWithTopHeader"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InputTime from "../../../common/inputs/InputTime";
+import InputWithTopHeader from "../../../common/inputs/InputWithTopHeader";
 
 const addShiftFormSchema = z.object({
   position: z.enum(["supervisor", "guard", "other"]),
@@ -16,6 +17,7 @@ const addShiftFormSchema = z.object({
   start_time: z.string().min(2, { message: "Start time is required" }),
   end_time: z.string().min(2, { message: "End time is required" }),
   description: z.string().nullable().optional(),
+  name: z.string().min(2, { message: "Shift name is required" }),
 });
 
 export type AddShiftFormFields = z.infer<typeof addShiftFormSchema>;
@@ -107,11 +109,18 @@ const AddShiftModal = ({
                 error={methods.formState.errors.position?.message}
               />
 
+              <InputWithTopHeader
+                className="mx-0"
+                label="Shift name"
+                register={methods.register}
+                name="name"
+                error={methods.formState.errors?.name?.message}
+              />
+
               <InputDate
                 label="Date"
                 value={shiftDate}
                 setValue={setShiftDate}
-                id="shift_date"
               />
 
               <InputTime

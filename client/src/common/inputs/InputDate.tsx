@@ -33,15 +33,16 @@ const InputDate = ({ setValue, label, value, error, id }: InputDateProps) => {
           styles: {
             dropdown: {
               backgroundColor: `#FFFFFF`,
-              zIndex: 100,
+              zIndex: 300,
               boxShadow: "0 1px 2px rgba(0, 0, 0, 0.4)",
+              position: "fixed",
             },
           },
         }}
         styles={{
           input: {
             border: `1px solid #ccc`,
-            fontSize: "14px",
+            fontSize: "18px",
             borderRadius: "4px",
             background: "#FFFFFF",
             color: "#000000",

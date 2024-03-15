@@ -93,7 +93,7 @@ const InputTime = ({
             <input
               value={value}
               type="text"
-              className={`w-full text-sm py-1 pl-2
+              className={`w-full text-lg py-2 pl-2
                outline-none  pr-2`}
               disabled={disabled}
               onClick={() => setDropdown(!dropdown)}
